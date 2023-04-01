@@ -19,6 +19,7 @@ std::string itoa(int nbre)
     }
     return (str);
 }
+
 bool BitcoinExchange::check_date(std::string date)
 {
     std::stringstream ss;
@@ -56,7 +57,7 @@ bool BitcoinExchange::check_date(std::string date)
     }
     if (!( year >= 2009 ))
     {
-        std::cout << "\033[31m\033[1mBitcoin not published yet 😢\033[0m" << std::endl;
+        std::cout << "\033[31m\033[1m" << date_tmp <<" => Bitcoin not published yet 😢\033[0m" << std::endl;
         return false;
     }
     if (!(month >= 1 && month <= 12))
@@ -80,21 +81,31 @@ bool BitcoinExchange::check_date(std::string date)
     }
     else
     {
-        std::map<std::string, std::string>::iterator low;
-        low = this->database.lower_bound(date_tmp);
-
-        if (low != this->database.end())
+         while(year >=2009)
         {
-            low--;
-            this->factor = atof(this->database[low->first].c_str());
-            std::cout << low->first << " "<< low->second << " " << this->factor << std::endl;
-        }
-        else
-            this->factor = 0;
-        return true;
-       
+            while(month >= 1)
+            {
+                while(day >= 1)
+                {
+                    date_tmp = itoa(year);
+                    date_tmp +="-" + itoa(month);
+                    date_tmp +="-" + itoa(day);
+                    if (!this->database[date_tmp].empty())
+                    {
+                        this->factor = atof(this->database[date_tmp].c_str());
+                        return true;
+                    }
+                    day--;
+                }
+                day = 31;
+                month--;
+            }
+            month = 12;
+            year--;
+        }       
     }
-    return false;
+    this->factor = 0;
+    return true;
 }
 BitcoinExchange::BitcoinExchange()
 {
